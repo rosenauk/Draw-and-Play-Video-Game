@@ -39,8 +39,16 @@ Scrum record:
   for swift and sharing the links with eachother so that once we do have the software we can start coding right away.
   
   Meeting 2:
+  We have now all gotten the software to access macincloud (the virtual virtual space) and have started the coding for taking a picture through the app. The problem we are 
+  running into now is that the macincloud managed server that we have doesn't allow the user to connect their phone to test the app. We have been talking with Scott to look 
+  for an alternative.
   
-
-
+  Meeting 3:
+  We have got conformation from Scott about how we can continue to develop using the managed servers. We will upload our code as beta to the app store and from there we can
+  test our beta using an app called Test Flight. We also split up our jobs over the next week between each member. Vinh will be looking into image processing on a pre-uploaded
+  image for now. He will start to develop a way to transform that still image into obstacles for the level. Ying will now be looking into the physics engine for the ball. He
+  will determine things like direction and velocity. Kyle will be creating the shell/ look of the app to initially take the picture. He will write code to let the user take a
+  picture and then use that picture for the images that Vinh is working on processing. Matthew will be looking into Test Flight and seeing how that will work for our project.
+  He will be working with Kyle to get the testing of picture taking working using Test Flight.
 
 
