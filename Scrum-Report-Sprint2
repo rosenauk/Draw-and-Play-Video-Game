@@ -9,22 +9,35 @@ Product log:
 
 
 Member task: 
+
 Kyle Rosenau
 - Create the function of having the picture crop the image taken to just the piece of paper
+- Work on the main screen to add more detail and looks to it
 
 Matthew Alonso  ~ Scrum master
 - Facilitate scrum meeting
 - Create documentation
+- Link up the seperate parts so they work together in the app
 
 Ying Li
 - Create a shell of the engine that plays the game
+- Continue work on the engine to add variables for the different parts of the game
 
 Vinh Nguyen
-- Start creating the code to transform a picture into the level that Ying is creating
+- Create the code to transform a picture into the level that Ying is creating using image processing
 
 
 Scrum record:
 
 * Part 1:
 We seperated into more individualized tasks that each of us could do seperately from each other. Matthew has been working on TestFlight a lot and is now pretty much done working
-on it and the rest of his responsibility with it is to help others if they are 
+on it and the rest of his responsibility with it is to help others if they are having trouble. He will now transfer focus to linking up the different parts of the app to work 
+together. Kyle will work on the main menu and changing the initial picture taking to crop the image automatically. Ying has been working on the engine for the game and will 
+continue to add functionality to it. Vinh will be working on the image processing which will change the initial picure into the level that Ying is working on.
+
+* Part 2:
+We talked mostly about the teams expectations of when each part is to be completed. We decited that by the end of Fall term we want to have an app with the different parts 
+connecting. We understand that each part might not be working perfectly but we want to have something that we can come back to in Winter term and start working on. The biggest
+part of this will be to get the image processing started and have that be the link between taking a picture and playing the game.
+
+* Part 3:
