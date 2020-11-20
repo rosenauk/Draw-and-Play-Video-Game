@@ -1,0 +1,30 @@
+Sprint goal:  
+Now that we have the shell of an app, the members are going to split up into more individual parts so we can work on the multiple different sections of this app in tandem.
+By the end of this sprint we want to have at least the outline of each individual part (Taking the picture, the game engine that plays the level, and the code to transfer 
+the picture into the playable level).
+            
+            
+Product log: 
+
+
+
+Member task: 
+Kyle Rosenau
+- Create the function of having the picture crop the image taken to just the piece of paper
+
+Matthew Alonso  ~ Scrum master
+- Facilitate scrum meeting
+- Create documentation
+
+Ying Li
+- Create a shell of the engine that plays the game
+
+Vinh Nguyen
+- Start creating the code to transform a picture into the level that Ying is creating
+
+
+Scrum record:
+
+* Part 1:
+We seperated into more individualized tasks that each of us could do seperately from each other. Matthew has been working on TestFlight a lot and is now pretty much done working
+on it and the rest of his responsibility with it is to help others if they are 
