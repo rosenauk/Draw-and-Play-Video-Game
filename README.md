@@ -1,10 +1,15 @@
 # Draw-and-Play-Video-Game
 Senior Software ENGR Project CS46x. An IOS app that will transform a picture into a playable game.
 
-Folders:
+#How to Run
+1.Download openCV IOS pack from [here](https://opencv.org/releases/).
+2.Unpack it then add the opencv2.framework folder to the project.
 
-DaPVG = old code. What we started with
+# TODO:
+- Detect cross lines
 
-Draw and Play Video Game = first part of the app. Taking pictures and image processing
 
-gamedemo = second part of the app. game engine
+# BUGs
+* App will crash when upload high resolution photos
+* App will crash after uploading photos multiple times
+* [Swift default AlertViewController breaking constraints](https://stackoverflow.com/questions/55653187/swift-default-alertviewcontroller-breaking-constraints)

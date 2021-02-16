@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F258D8725DBC7EB00A5DBA7 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F258D8625DBC7EB00A5DBA7 /* opencv2.framework */; };
+		2F258D8D25DBC95800A5DBA7 /* LineDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2F258D8C25DBC95800A5DBA7 /* LineDetector.cpp */; };
+		2F258D9425DBC96600A5DBA7 /* LaneDetectorBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2F258D9325DBC96600A5DBA7 /* LaneDetectorBridge.mm */; };
 		2FC7E74525D600B1003F3BE6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2FC7E74325D600B1003F3BE6 /* LaunchScreen.storyboard */; };
 		2FC7E74B25D600B6003F3BE6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2FC7E74925D600B6003F3BE6 /* Main.storyboard */; };
 		2FC7E75025D6012A003F3BE6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FC7E74F25D6012A003F3BE6 /* ViewController.swift */; };
@@ -39,6 +42,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2F258D8625DBC7EB00A5DBA7 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
+		2F258D8B25DBC95700A5DBA7 /* DAPGAME-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DAPGAME-Bridging-Header.h"; sourceTree = "<group>"; };
+		2F258D8C25DBC95800A5DBA7 /* LineDetector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LineDetector.cpp; sourceTree = "<group>"; };
+		2F258D9125DBC95E00A5DBA7 /* LineDetector.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = LineDetector.hpp; sourceTree = "<group>"; };
+		2F258D9225DBC96200A5DBA7 /* LineDetectorBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LineDetectorBridge.h; sourceTree = "<group>"; };
+		2F258D9325DBC96600A5DBA7 /* LaneDetectorBridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LaneDetectorBridge.mm; sourceTree = "<group>"; };
 		2FC7E74425D600B1003F3BE6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		2FC7E74A25D600B6003F3BE6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		2FC7E74F25D6012A003F3BE6 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -64,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F258D8725DBC7EB00A5DBA7 /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +117,7 @@
 		2FF5294025605C37001588A3 /* DAPGAME */ = {
 			isa = PBXGroup;
 			children = (
+				2F258D8625DBC7EB00A5DBA7 /* opencv2.framework */,
 				2FF5294125605C37001588A3 /* AppDelegate.swift */,
 				2FF5294725605C38001588A3 /* GameScene.swift */,
 				2FC7E74F25D6012A003F3BE6 /* ViewController.swift */,
@@ -115,8 +126,13 @@
 				2FF5294B25605C38001588A3 /* Game.storyboard */,
 				2FC7E74925D600B6003F3BE6 /* Main.storyboard */,
 				2FC7E74325D600B1003F3BE6 /* LaunchScreen.storyboard */,
+				2F258D8C25DBC95800A5DBA7 /* LineDetector.cpp */,
+				2F258D9125DBC95E00A5DBA7 /* LineDetector.hpp */,
+				2F258D9225DBC96200A5DBA7 /* LineDetectorBridge.h */,
+				2F258D9325DBC96600A5DBA7 /* LaneDetectorBridge.mm */,
 				2FF5294E25605C3E001588A3 /* Assets.xcassets */,
 				2FF5295025605C3E001588A3 /* Info.plist */,
+				2F258D8B25DBC95700A5DBA7 /* DAPGAME-Bridging-Header.h */,
 			);
 			path = DAPGAME;
 			sourceTree = "<group>";
@@ -207,6 +223,7 @@
 				TargetAttributes = {
 					2FF5293D25605C37001588A3 = {
 						CreatedOnToolsVersion = 12.2;
+						LastSwiftMigration = 1240;
 					};
 					2FF5295425605C3E001588A3 = {
 						CreatedOnToolsVersion = 12.2;
@@ -274,8 +291,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				2FF5294825605C38001588A3 /* GameScene.swift in Sources */,
+				2F258D8D25DBC95800A5DBA7 /* LineDetector.cpp in Sources */,
 				2FF5294A25605C38001588A3 /* GameViewController.swift in Sources */,
 				2FC7E75025D6012A003F3BE6 /* ViewController.swift in Sources */,
+				2F258D9425DBC96600A5DBA7 /* LaneDetectorBridge.mm in Sources */,
 				2FF5294225605C37001588A3 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -460,8 +479,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WBQXCB476T;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DAPGAME",
+				);
 				INFOPLIST_FILE = DAPGAME/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -469,6 +493,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = oregonstaeuniversity.DAPGAME;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "DAPGAME/DAPGAME-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -479,8 +505,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WBQXCB476T;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DAPGAME",
+				);
 				INFOPLIST_FILE = DAPGAME/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -488,6 +519,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = oregonstaeuniversity.DAPGAME;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "DAPGAME/DAPGAME-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
