@@ -14,6 +14,7 @@ var imagePicker: UIImagePickerController!
 class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     @IBAction func takePhoto(_ sender: Any) {
             imagePicker =  UIImagePickerController()
+            imagePicker.allowsEditing = true
             imagePicker.delegate = self
             imagePicker.sourceType = .camera
 
