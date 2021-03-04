@@ -12,5 +12,5 @@
 @interface LineDetectorBridge : NSObject
     
 - (UIImage *) detectLineIn: (UIImage *) image;
-    
+- (NSMutableArray *) image2map: (UIImage *) image;
 @end

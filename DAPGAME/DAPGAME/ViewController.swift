@@ -8,6 +8,9 @@
 import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    var gameData:[MapObject]?
+    
     @IBAction func takePhoto(_ sender: Any) {
         let actionSheetController = UIAlertController(title: "Choose your image", message: nil, preferredStyle: .actionSheet)
         
@@ -83,7 +86,21 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         super.prepare(for: segue, sender: sender)
         if let vc = segue.destination as? GameViewController {
             //vc.modalPresentationStyle = .fullScreen
-            vc.message = "My Message"
+            
+            //Modify this
+            let demodata:[MapObject]? = [
+                ("o",CGPoint(x:1.0,y:1.0),90.0,48.0),
+                ("b",CGPoint(x:-60.0,y:-120.0),90.0,48.0),
+                ("b",CGPoint(x:60.0,y:-240.0),90.0,48.0),
+                ("x",CGPoint(x:10.0,y:200.0),90.0,48.0),
+                ("w",CGPoint(x:20.0,y:390.0),0.0,314.0),
+                ("w",CGPoint(x:-130.0,y:233.0),-90.0,314.0),
+                ("w",CGPoint(x:7.0,y:76.0),0.0,233.0),
+                ("w",CGPoint(x:125.0,y:200.0),90.0,233.0),
+                ("w",CGPoint(x:25.0,y:301.0),-180.0,176.0),
+                ("w",CGPoint(x:-56.0,y:230.0),-270.0,100.0)
+            ]
+            vc.gameData = demodata ?? []
         }
     }
 }

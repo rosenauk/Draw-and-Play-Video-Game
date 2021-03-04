@@ -9,17 +9,14 @@ import SpriteKit
 import GameplayKit
 import CoreMotion
 
+typealias MapObject = (String,CGPoint,CGFloat,CGFloat)// type, postion, angle, size
+
 class GameScene: SKScene,SKPhysicsContactDelegate {
     
-    var mssg:String?="NOOO"
+    let debug = true
     
-    typealias MapObject = (String,CGPoint,CGFloat,CGFloat)
-    var demodata:[MapObject] = [
-        ("o",CGPoint(x:1.0,y:1.0),48.0,48.0),
-        ("b",CGPoint(x:-60.0,y:-60.0),48.0,48.0),
-        ("b",CGPoint(x:60.0,y:-60.0),48.0,48.0),
-        ("x",CGPoint(x:0.0,y:-500.0),48.0,48.0)
-    ]
+    
+    var mapData:[MapObject] = []
     
     var entities = [GKEntity]()
     var graphs = [String : GKGraph]()
@@ -42,6 +39,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
     private var labelx : SKLabelNode?
     private var labely : SKLabelNode?
     private var winText : SKLabelNode?
+    private var tipText : SKLabelNode?
     
     override func sceneDidLoad() {
         startAccelerometers()
@@ -53,6 +51,7 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         
         self.winText = self.childNode(withName: "//wintext") as? SKLabelNode
         
+        self.tipText = self.childNode(withName: "//tips") as? SKLabelNode
         // Create shape node to use during mouse interaction
         let w = (self.size.width + self.size.height) * 0.05
         self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
@@ -71,48 +70,55 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         self.physicsWorld.contactDelegate = self
         
         self.backgroundColor = SKColor.white
-        
-        self.winText?.text = mssg
-//
+            
+        if !debug {
+            self.tipText?.text = ""
+        }
         //create a ball
-        initialize(data:demodata)
+        initialize(data:mapData)
     }
     
     
     func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
+        if debug {
+            if let n = self.spinnyNode?.copy() as! SKShapeNode? {
+                n.position = pos
+                n.strokeColor = SKColor.green
+                self.addChild(n)
+            }
+            
+            addBlock(px: pos.x, py: pos.y)
         }
-        
-        addBlock(px: pos.x, py: pos.y)
     }
     
     func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
+        if debug {
+            if let n = self.spinnyNode?.copy() as! SKShapeNode? {
+                n.position = pos
+                n.strokeColor = SKColor.blue
+                self.addChild(n)
+            }
         }
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
+        if debug {
+            if let n = self.spinnyNode?.copy() as! SKShapeNode? {
+                n.position = pos
+                n.strokeColor = SKColor.red
+                self.addChild(n)
+            }
         }
     }
     
     //add a block to the game view
     
     func addBlock(px:CGFloat, py:CGFloat ) {
-        let block = SKSpriteNode(imageNamed: "block")
+        let block = SKSpriteNode(imageNamed: "block_px")
 
         block.position = CGPoint(x:px,y:py)
         block.name = "block"
-        block.setScale(0.2)
+        block.setScale(1)
         block.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: block.size.width,height: block.size.height))
         block.physicsBody?.affectedByGravity = false
         block.physicsBody?.pinned = true
@@ -120,23 +126,38 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         self.addChild(block)
     }
     
+    func addWall(px:CGFloat, py:CGFloat,theta:CGFloat,size:CGFloat ) { // position(x,y), angle, length
+        let wall = SKSpriteNode(imageNamed: "wall_px")
+
+        wall.position = CGPoint(x:px,y:py)
+        wall.name = "wall"
+        wall.setScale(1)
+        wall.size = CGSize(width: size, height: wall.size.width/8)
+        wall.zRotation = CGFloat(Double.pi)/(180.0/theta)
+        wall.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: wall.size.width,height: wall.size.height))
+        wall.physicsBody?.affectedByGravity = false
+        wall.physicsBody?.pinned = true
+        wall.physicsBody?.allowsRotation = false
+        self.addChild(wall)
+    }
+    
     func addBall(px:CGFloat, py:CGFloat ) {
-        self.ball = SKSpriteNode(imageNamed: "ball")
+        self.ball = SKSpriteNode(imageNamed: "ball_px")
         self.ball!.name = "Ball"
         self.ball!.position = CGPoint(x: px, y: py)
-        self.ball!.setScale(0.1)
+        self.ball!.setScale(1)
         self.ball!.physicsBody = SKPhysicsBody(circleOfRadius: self.ball!.size.width / 2.0)
         self.ball!.physicsBody?.contactTestBitMask = 1
         self.addChild(self.ball!)
     }
     
     func addGoal(px:CGFloat, py:CGFloat ) {
-        self.goal = SKSpriteNode(imageNamed: "Xmark")
+        self.goal = SKSpriteNode(imageNamed: "Xmark_px")
         self.goal!.name = "Xmark"
         self.goal!.position = CGPoint(x: px, y: py)
         self.goal!.zPosition = -1
         self.goal!.physicsBody = SKPhysicsBody(texture: (self.goal?.texture)!, size:(self.goal?.texture)!.size())
-        self.goal!.setScale(0.2)
+        self.goal!.setScale(1)
         self.goal!.physicsBody?.isDynamic = false
         self.goal!.physicsBody?.allowsRotation = false
         self.goal!.physicsBody?.affectedByGravity = false
@@ -150,15 +171,18 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
     
     func initialize(data:[MapObject]) {
         //name position wdith height
-        for (name,pos,_,_)in data{
+        for (name,pos,theta,size)in data{
             if(name=="o"||name=="O"){
                 addBall(px: pos.x, py: pos.y)
             }
-            if(name=="b"||name=="B"){
+            else if(name=="b"||name=="B"){
                 addBlock(px: pos.x, py: pos.y)
             }
-            if(name=="x"||name=="X"){
+            else if(name=="x"||name=="X"){
                 addGoal(px: pos.x, py: pos.y)
+            }
+            else if(name=="w"||name=="W"){
+                addWall(px: pos.x, py: pos.y,theta: theta,size:size)
             }
         }
     }
@@ -186,8 +210,15 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
     override func update(_ currentTime: TimeInterval) {
         let x = 10.0 * (self.accmx ?? 0 )
         let y = 10.0 * (self.accmy ?? -0.98)
-        self.labelx!.text = "X: " + String(format: "%f", x )
-        self.labely!.text = "Y: " + String(format: "%f", y )
+        //DEBUG
+        if debug {
+            self.labelx!.text = "X: " + String(format: "%f", x )
+            self.labely!.text = "Y: " + String(format: "%f", y )
+        }else{
+            self.labelx!.text = ""
+            self.labely!.text = ""
+        }
+        
         self.physicsWorld.gravity = CGVector(dx:x ,dy:y )
         // Called before each frame is rendered
         
@@ -289,9 +320,9 @@ class GameScene: SKScene,SKPhysicsContactDelegate {
         self.winText?.text = "Win！"
     }
     
-    func getDistance(p1:CGPoint,p2:CGPoint)->CGFloat {
-        let xDist = (p2.x - p1.x)
-        let yDist = (p2.y - p1.y)
-        return CGFloat(sqrt((xDist * xDist) + (yDist * yDist)))
-    }
+//    func getDistance(p1:CGPoint,p2:CGPoint)->CGFloat {
+//        let xDist = (p2.x - p1.x)
+//        let yDist = (p2.y - p1.y)
+//        return CGFloat(sqrt((xDist * xDist) + (yDist * yDist)))
+//    }
 }

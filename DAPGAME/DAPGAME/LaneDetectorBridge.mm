@@ -12,6 +12,7 @@
 #import "LineDetectorBridge.h"
 #include "LineDetector.hpp"
 
+
 @implementation LineDetectorBridge
     
 //- (UIImage *) detectLaneIn: (UIImage *) image {
@@ -48,6 +49,13 @@
     
     // convert mat to uiimage and return it to the caller
     return MatToUIImage(imageWithLaneDetected);
+}
+
+- (NSMutableArray *) image2map: (UIImage *) image {
+    static NSMutableArray *array = [NSMutableArray arrayWithCapacity:2];
+    
+
+    return array;
 }
     
     @end

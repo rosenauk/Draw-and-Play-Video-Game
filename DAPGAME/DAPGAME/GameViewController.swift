@@ -10,11 +10,10 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
-    var message: String? = "nil"
+    var gameData: [MapObject] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(message ?? "Fail")
         // Load 'GameScene.sks' as a GKScene. This provides gameplay related content
         // including entities and graphs.
         if let scene = GKScene(fileNamed: "GameScene") {
@@ -29,7 +28,7 @@ class GameViewController: UIViewController {
                 // Set the scale mode to scale to fit the window
                 sceneNode.scaleMode = .aspectFill
                 //sceneNode.userData
-                sceneNode.mssg = message
+                sceneNode.mapData = gameData
                 // Present the scene
                 if let view = self.view as! SKView? {
                     view.presentScene(sceneNode)
