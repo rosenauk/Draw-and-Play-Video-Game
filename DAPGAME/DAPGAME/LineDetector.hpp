@@ -52,5 +52,6 @@ class LineDetector {
      Returns image with lane overlay
      */
     Mat detect_line(Mat image);
+    String img2json(Mat image);
     
 };

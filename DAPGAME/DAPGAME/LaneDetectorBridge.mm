@@ -11,7 +11,7 @@
 #import <Foundation/Foundation.h>
 #import "LineDetectorBridge.h"
 #include "LineDetector.hpp"
-
+#include <string>
 
 @implementation LineDetectorBridge
     
@@ -33,7 +33,7 @@
 //    return MatToUIImage(imageWithLaneDetected);
 //}
 
-- (UIImage *) detectLineIn: (UIImage *) image {
+- (UIImage *) detectLine: (UIImage *) image {
     
     // convert uiimage to mat
     cv::Mat opencvImage;
@@ -51,11 +51,22 @@
     return MatToUIImage(imageWithLaneDetected);
 }
 
-- (NSMutableArray *) image2map: (UIImage *) image {
-    static NSMutableArray *array = [NSMutableArray arrayWithCapacity:2];
+- (NSString *) image2map: (UIImage *) image {
     
-
-    return array;
+    cv::Mat opencvImage;
+    UIImageToMat(image, opencvImage, true);
+    
+    // convert colorspace to the one expected by the lane detector algorithm (RGB)
+    cv::Mat convertedColorSpaceImage;
+    cv::cvtColor(opencvImage, convertedColorSpaceImage, COLOR_RGBA2RGB);
+    
+    // Run lane detection
+    LineDetector lineDetector;
+    std::string stringresult= lineDetector.img2json(convertedColorSpaceImage);
+    NSString *nstringresult = [NSString stringWithCString:stringresult.c_str()
+                                       encoding:[NSString defaultCStringEncoding]];
+    
+    return nstringresult;
 }
     
     @end

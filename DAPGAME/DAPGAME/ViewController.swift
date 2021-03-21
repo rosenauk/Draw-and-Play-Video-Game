@@ -73,7 +73,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         takingPicture.dismiss(animated: true, completion: nil)
         if(takingPicture.allowsEditing == false){
             //Original image
-            let resultImage = LineDetectorBridge().detectLine(in: info[UIImagePickerController.InfoKey.originalImage]as? UIImage)
+            let resultobjs = LineDetectorBridge().image2map(info[UIImagePickerController.InfoKey.originalImage]as? UIImage)
+            let resultImage = LineDetectorBridge().detectLine(info[UIImagePickerController.InfoKey.originalImage]as? UIImage)
+            
+            let dict = convertStringToDictionary(text: resultobjs!)
+            print("This is the result: ")
+            print(dict ?? "Faile convert")
             imageView.image = resultImage
         }else{
             //Screenshot; Unprocessed
@@ -81,7 +86,30 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
  
     }
-
+    
+    func convertToDictionary(text: String) -> [String: Any]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                return try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+        return nil
+    }
+    
+    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+        if let data = text.data(using: .utf8) {
+            do {
+                let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                return json
+            } catch {
+                print("Something went wrong")
+            }
+        }
+        return nil
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         if let vc = segue.destination as? GameViewController {

@@ -7,8 +7,12 @@
 //
 
 #include "LineDetector.hpp"
+#include <nlohmann/json.hpp>
+#include <string>
 using namespace cv;
 using namespace std;
+
+using json = nlohmann::json;
 
 //double getAverage(vector<double> vector, int nElements) {
 //    
@@ -44,7 +48,34 @@ using namespace std;
 //    return draw_lines(image, lines);
 //}
 
-Mat LineDetector::detect_line(Mat image) {
+
+/*
+ Parameters:
+    type: "x"->cross, "o"->circle, "l"->line
+    The geometric center point of the object (x, y)
+    arg: The angle between the straight line and the +x axis (0,90), in degrees
+    size: the size of game object
+ */
+void addobj2json(json* gameobjs,String type, double x, double y, double arg, double size){
+    json obj;
+    obj["type"] = type;
+    obj["x"] = x;
+    obj["y"] = y;
+    obj["angle"] = arg;
+    obj["size"] = size;
+    
+    (*gameobjs)["gameobjs"].push_back(obj);
+}
+
+void objs2json(vector<Vec4f> objs, json* gameobjs)
+{
+    addobj2json(gameobjs,"o",50.0,50.0,0.0,10.0);
+    addobj2json(gameobjs,"o",50.0,50.0,0.0,10.0);
+}
+
+String LineDetector::img2json(Mat image) {
+    
+   
     /*
     Mat colorFilteredImage = filter_only_yellow_white(image);
     Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
@@ -83,8 +114,56 @@ Mat LineDetector::detect_line(Mat image) {
         Point point2 = Point(cvRound(lines[i][2]), cvRound(lines[i][3]));
         line(output, point1, point2, Scalar(255, 0, 0), 3);
     }
+    cout << "Image is processing" << endl;
+    json gameobjects;
+    objs2json(lines,&gameobjects);
+    std::cout << gameobjects<< std::endl;
+    return gameobjects.dump();
 
-    
+}
+
+Mat LineDetector::detect_line(Mat image) {
+
+    /*
+    Mat colorFilteredImage = filter_only_yellow_white(image);
+    Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
+    Mat edgesOnly = detect_edges(regionOfInterest);
+
+    vector<Vec4i> lines;
+    HoughLinesP(edgesOnly, lines, 1, CV_PI/180, 10, 20, 100);
+
+    return draw_lines(image, lines);
+     */
+
+    Mat grayImage,blurImage,cannyImage,output;
+    output=image.clone();
+    cvtColor(image, grayImage, COLOR_RGB2GRAY);
+    medianBlur(grayImage, blurImage, 5);
+    vector<Vec3f> circles;
+    HoughCircles(blurImage, circles, HOUGH_GRADIENT, 2, image.cols/8, 200, 100, 0, 0);
+
+    for (int i = 0; i < circles.size(); i++)
+    {
+        Point center((uint16_t)cvRound(circles[i][0]), (uint16_t)cvRound(circles[i][1]));
+        int radius = (uint16_t)cvRound(circles[i][2]);
+        // circle center
+        circle(output, center, 2, Scalar(0, 0, 255), 3);
+        // circle outline
+        circle(output, center, radius, Scalar(0, 255, 0),2);
+    }
+
+
+    Canny(grayImage, cannyImage, 50, 200, 3);
+    vector<Vec4f> lines;
+    HoughLinesP(cannyImage, lines, 2, CV_PI/180, 100, 50, 0);
+    for (size_t i = 0; i < lines.size(); i++)
+    {
+        Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
+        Point point2 = Point(cvRound(lines[i][2]), cvRound(lines[i][3]));
+        line(output, point1, point2, Scalar(255, 0, 0), 3);
+    }
+
+
     return output;
 
 }

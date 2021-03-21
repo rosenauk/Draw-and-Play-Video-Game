@@ -486,6 +486,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/DAPGAME",
 				);
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include/;
 				INFOPLIST_FILE = DAPGAME/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -512,6 +513,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/DAPGAME",
 				);
+				"HEADER_SEARCH_PATHS[arch=*]" = /usr/local/include/;
 				INFOPLIST_FILE = DAPGAME/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
