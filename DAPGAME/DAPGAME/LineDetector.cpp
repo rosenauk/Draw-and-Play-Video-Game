@@ -51,7 +51,7 @@ using json = nlohmann::json;
 
 /*
  Parameters:
-    type: "x"->cross, "o"->circle, "l"->line
+    type: "x"->cross, "o"->circle, "w"->line
     The geometric center point of the object (x, y)
     arg: The angle between the straight line and the +x axis (0,90), in degrees
     size: the size of game object
@@ -69,8 +69,10 @@ void addobj2json(json* gameobjs,String type, double x, double y, double arg, dou
 
 void objs2json(vector<Vec4f> objs, json* gameobjs)
 {
-    addobj2json(gameobjs,"o",50.0,50.0,0.0,10.0);
-    addobj2json(gameobjs,"o",50.0,50.0,0.0,10.0);
+    addobj2json(gameobjs,"o",1.0,1.0,90.0,48.0);
+    addobj2json(gameobjs,"x",10.0,200.0,90.0,80.0);
+    addobj2json(gameobjs,"w",20.0,390.0,0.0,314.0);
+    addobj2json(gameobjs,"b",60.0,-240.0,90.0,80.0);
 }
 
 String LineDetector::img2json(Mat image) {

@@ -8,7 +8,6 @@
 import UIKit
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    
     var gameData:[MapObject]?
     
     @IBAction func takePhoto(_ sender: Any) {
@@ -76,15 +75,32 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             let resultobjs = LineDetectorBridge().image2map(info[UIImagePickerController.InfoKey.originalImage]as? UIImage)
             let resultImage = LineDetectorBridge().detectLine(info[UIImagePickerController.InfoKey.originalImage]as? UIImage)
             
-            let dict = convertStringToDictionary(text: resultobjs!)
+            let dict = convertToDictionary(text: resultobjs!)
             print("This is the result: ")
-            print(dict ?? "Faile convert")
+            gameData = convertToMapobj(dict: dict!)
             imageView.image = resultImage
         }else{
             //Screenshot; Unprocessed
             imageView.image = info[UIImagePickerController.InfoKey.editedImage] as? UIImage
         }
  
+    }
+    
+    func convertToMapobj(dict: [String: Any]) -> [MapObject] {
+        let objs = dict["gameobjs"] as? [[String: Any]]
+        var data:[MapObject] = []
+        for obj in objs!{
+            let type:String = obj["type"] as! String
+            let x:CGFloat = obj["x"] as! CGFloat
+            let y:CGFloat = obj["y"] as! CGFloat
+            let angle:CGFloat = obj["angle"] as! CGFloat
+            let size:CGFloat = obj["size"] as! CGFloat
+            let gameobj:MapObject  = (
+                type,CGPoint(x:CGFloat(x),y:CGFloat(y)),CGFloat(angle),CGFloat(size))
+            data.append(gameobj)
+        }
+        print(data)
+        return data
     }
     
     func convertToDictionary(text: String) -> [String: Any]? {
@@ -98,17 +114,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return nil
     }
     
-    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-        if let data = text.data(using: .utf8) {
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-                return json
-            } catch {
-                print("Something went wrong")
-            }
-        }
-        return nil
-    }
+//    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+//        if let data = text.data(using: .utf8) {
+//            do {
+//                let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+//                return json
+//            } catch {
+//                print("Something went wrong")
+//            }
+//        }
+//        return nil
+//    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
@@ -116,7 +132,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             //vc.modalPresentationStyle = .fullScreen
             
             //Modify this
-            let demodata:[MapObject]? = [
+            let demoData:[MapObject] = [
                 ("o",CGPoint(x:1.0,y:1.0),90.0,48.0),
                 ("b",CGPoint(x:-60.0,y:-120.0),90.0,48.0),
                 ("b",CGPoint(x:60.0,y:-240.0),90.0,48.0),
@@ -128,7 +144,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 ("w",CGPoint(x:25.0,y:301.0),-180.0,176.0),
                 ("w",CGPoint(x:-56.0,y:230.0),-270.0,100.0)
             ]
-            vc.gameData = demodata ?? []
+            vc.gameData = gameData ?? demoData
         }
     }
 }
