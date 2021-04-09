@@ -77,7 +77,13 @@ void objs2json(vector<Vec4f> objs, json* gameobjs)
 
 String LineDetector::img2json(Mat image) {
     
-   
+    cout << "Image is processing" << endl;
+    cv::Size size = image.size();
+    double height = size.height;
+    double width = size.width;
+    cout << "Height: "<< height <<endl;
+    cout << "Width: "<< width <<endl;
+    json gameobjects;
     /*
     Mat colorFilteredImage = filter_only_yellow_white(image);
     Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
@@ -94,32 +100,37 @@ String LineDetector::img2json(Mat image) {
     cvtColor(image, grayImage, COLOR_RGB2GRAY);
     medianBlur(grayImage, blurImage, 5);
     vector<Vec3f> circles;
-    HoughCircles(blurImage, circles, HOUGH_GRADIENT, 2, image.cols/8, 200, 100, 0, 0);
+    HoughCircles(blurImage, circles, HOUGH_GRADIENT, 1, image.cols/8, 100, 100, 0, 0);
 
     for (int i = 0; i < circles.size(); i++)
     {
         Point center((uint16_t)cvRound(circles[i][0]), (uint16_t)cvRound(circles[i][1]));
-        int radius = (uint16_t)cvRound(circles[i][2]);
-        // circle center
-        circle(output, center, 2, Scalar(0, 0, 255), 3);
-        // circle outline
-        circle(output, center, radius, Scalar(0, 255, 0),2);
+        double x = (center.x - (width/2))/width * 750 ;
+        double y = -1*(center.y - (height/2))/height * 1334 ;
+        int radius = (uint16_t)cvRound(circles[i][2])/(width*height/(750*1334));
+//        // circle center
+        addobj2json(&gameobjects,"o",x,y,90.0,radius);
     }
 
     
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 2, CV_PI/180, 100, 50, 0);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 50, 10);
     for (size_t i = 0; i < lines.size(); i++)
     {
         Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
         Point point2 = Point(cvRound(lines[i][2]), cvRound(lines[i][3]));
-        line(output, point1, point2, Scalar(255, 0, 0), 3);
+        Point center = Point((point1.x+point2.x)/2,(point1.y+point2.y)/2);
+        double x = (center.x - (width/2))/width * 750 ;
+        double y = -1*(center.y - (height/2))/height * 1334 ;
+        double length = cv::norm(point1 - point2)/(width*height/(750*1334));
+        double  k = (double)(lines[i][3] - lines[i][1]) / (double)(lines[i][2] - lines[i][0]);
+        double angle = atan(k) * 180.0/3.1415926;
+        addobj2json(&gameobjects,"w",x,y,angle,length);
     }
-    cout << "Image is processing" << endl;
-    json gameobjects;
-    objs2json(lines,&gameobjects);
-    std::cout << gameobjects<< std::endl;
+    
+    //objs2json(lines,&gameobjects);
+    //std::cout << gameobjects<< std::endl;
     return gameobjects.dump();
 
 }
@@ -142,8 +153,10 @@ Mat LineDetector::detect_line(Mat image) {
     cvtColor(image, grayImage, COLOR_RGB2GRAY);
     medianBlur(grayImage, blurImage, 5);
     vector<Vec3f> circles;
-    HoughCircles(blurImage, circles, HOUGH_GRADIENT, 2, image.cols/8, 200, 100, 0, 0);
-
+    HoughCircles(blurImage, circles, HOUGH_GRADIENT, 1, image.cols/8, 100, 100, 0, 0);
+//    cout << "Circles" << endl;
+//    for (vector<Vec3f>::const_iterator i = circles.begin(); i != circles.end(); ++i)
+//        cout << *i << "||";
     for (int i = 0; i < circles.size(); i++)
     {
         Point center((uint16_t)cvRound(circles[i][0]), (uint16_t)cvRound(circles[i][1]));
@@ -157,7 +170,7 @@ Mat LineDetector::detect_line(Mat image) {
 
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 2, CV_PI/180, 100, 50, 0);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 50, 10);
     for (size_t i = 0; i < lines.size(); i++)
     {
         Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
