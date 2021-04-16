@@ -9,6 +9,7 @@
 #include "LineDetector.hpp"
 #include <nlohmann/json.hpp>
 #include <string>
+#include <algorithm>
 using namespace cv;
 using namespace std;
 
@@ -83,6 +84,15 @@ String LineDetector::img2json(Mat image) {
     double width = size.width;
     cout << "Height: "<< height <<endl;
     cout << "Width: "<< width <<endl;
+    if (height >720 || width > 720)
+    {
+        double ratio = 720/max(width,height);
+        cout<< "[game]Scale ratio is " << ratio <<endl;
+        resize(image, image,cv::Size(),ratio,ratio); //scale to 720*720
+        size = image.size();
+        height = size.height;
+        width = size.width;
+    }
     json gameobjects;
     /*
     Mat colorFilteredImage = filter_only_yellow_white(image);
@@ -147,6 +157,21 @@ Mat LineDetector::detect_line(Mat image) {
 
     return draw_lines(image, lines);
      */
+    cv::Size size = image.size();
+    double height = size.height;
+    double width = size.width;
+    
+    if (height > 720 || width > 720)
+    {
+        double ratio = 720/max(width,height);
+        cout<< "[game]Scale ratio is " << ratio <<endl;
+        resize(image, image,cv::Size(),ratio,ratio); //scale to 720*720
+        size = image.size();
+        height = size.height;
+        width = size.width;
+    }
+    
+    
 
     Mat grayImage,blurImage,cannyImage,output;
     output=image.clone();
@@ -170,7 +195,7 @@ Mat LineDetector::detect_line(Mat image) {
 
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 50, 10);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 50, 100);
     for (size_t i = 0; i < lines.size(); i++)
     {
         Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
