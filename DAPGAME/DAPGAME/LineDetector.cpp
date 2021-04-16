@@ -2,9 +2,6 @@
 //  LaneDetector.cpp
 //  SimpleLaneDetection
 //
-//  Created by Anurag Ajwani on 28/04/2019.
-//  Copyright © 2019 Anurag Ajwani. All rights reserved.
-//
 
 #include "LineDetector.hpp"
 #include <nlohmann/json.hpp>
@@ -15,43 +12,17 @@ using namespace std;
 
 using json = nlohmann::json;
 
+#define GAP 5 //Set the pixel pitch
 const int screen_height = 1334 * 0.8;
 const int screen_width = 750 * 0.8;
 
-//double getAverage(vector<double> vector, int nElements) {
-//    
-//    double sum = 0;
-//    int initialIndex = 0;
-//    int last30Lines = int(vector.size()) - nElements;
-//    if (last30Lines > 0) {
-//        initialIndex = last30Lines;
-//    }
-//    
-//    for (int i=(int)initialIndex; i<vector.size(); i++) {
-//        sum += vector[i];
-//    }
-//    
-//    int size;
-//    if (vector.size() < nElements) {
-//        size = (int)vector.size();
-//    } else {
-//        size = nElements;
-//    }
-//    return (double)sum/size;
-//}
-//
-//Mat LaneDetector::detect_lane(Mat image) {
-//    
-//    Mat colorFilteredImage = filter_only_yellow_white(image);
-//    Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
-//    Mat edgesOnly = detect_edges(regionOfInterest);
-//    
-//    vector<Vec4i> lines;
-//    HoughLinesP(edgesOnly, lines, 1, CV_PI/180, 10, 20, 100);
-//    
-//    return draw_lines(image, lines);
-//}
 
+bool cmp1(const Vec4f &a, const Vec4f &b) {
+    return a[1] < b[1];//x1,y1,x2,y2,
+}
+bool cmp2(const Vec4f &a, const Vec4f &b) {
+    return a[0] < b[0];//x1,y1,x2,y2
+}
 
 /*
  Parameters:
@@ -71,13 +42,13 @@ void addobj2json(json* gameobjs,String type, double x, double y, double arg, dou
     (*gameobjs)["gameobjs"].push_back(obj);
 }
 
-void objs2json(vector<Vec4f> objs, json* gameobjs)
-{
-    addobj2json(gameobjs,"o",1.0,1.0,90.0,48.0);
-    addobj2json(gameobjs,"x",10.0,200.0,90.0,80.0);
-    addobj2json(gameobjs,"w",20.0,390.0,0.0,314.0);
-    addobj2json(gameobjs,"b",60.0,-240.0,90.0,80.0);
-}
+//void objs2json(vector<Vec4f> objs, json* gameobjs) // a demo, used for testing
+//{
+//    addobj2json(gameobjs,"o",1.0,1.0,90.0,48.0);
+//    addobj2json(gameobjs,"x",10.0,200.0,90.0,80.0);
+//    addobj2json(gameobjs,"w",20.0,390.0,0.0,314.0);
+//    addobj2json(gameobjs,"b",60.0,-240.0,90.0,80.0);
+//}
 
 String LineDetector::img2json(Mat image) {
     
@@ -129,37 +100,110 @@ String LineDetector::img2json(Mat image) {
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
     HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 75, 30);
-    for (size_t i = 0; i < lines.size(); i++)
+    
+    
+/* Filter lines begin*/
+    std::vector<cv::Vec4f> lines_horizon, lines_vertical,lines_slanted;
+        for (int i = 0; i < lines.size(); ++i) {
+            cv::Vec4i line_ = lines[i];
+            double k = (double)(line_[3] - line_[1]) / (double)(line_[2] - line_[0]);//The slope of the line
+            double angle = atan(k) * 180 / CV_PI;//Straight angle
+            //horizontal direction 0°/180°/-180°/360°
+            if ((angle >= -1 && angle <= 1) || (angle >= 359 && angle <= 361) || (angle >= 179 && angle <= 181) || (angle >= -181 && angle <= -179)) {//horizontal lines
+                lines_horizon.push_back(line_);
+            }//vertical direction 90°/-90°/270°/-270°
+            else if ((angle >= 89 && angle <= 91) || (angle >= -91 && angle <= -89) || (angle >= 269 && angle <= 271) || (angle >= -271 && angle <= -269)) {//vertical lines
+                lines_vertical.push_back(line_);
+            }
+            else lines_slanted.push_back(line_);
+        }
+    
+    
+/* detect cross*/
+    
+    if(lines_slanted.size()>=2){
+
+        Point2f p1 = Point2f(cvRound(lines_slanted[0][0]), cvRound(lines_slanted[0][1]));
+        Point2f p2 = Point2f(cvRound(lines_slanted[0][2]), cvRound(lines_slanted[0][3]));
+        for (size_t i = 1; i < lines_slanted.size(); i++)
+        {
+            Point2f p3 = Point2f(cvRound(lines_slanted[i][0]), cvRound(lines_slanted[i][1]));
+            Point2f p4 = Point2f(cvRound(lines_slanted[i][2]), cvRound(lines_slanted[i][3]));
+            Point2f x = p3 - p1;
+            Point2f d1 = p2 - p1;
+            Point2f d2 = p4 - p3;
+            float cross = d1.x*d2.y - d1.y*d2.x;
+            if (abs(cross) >= /*EPS*/1e-8) {
+                double t1 = (x.x * d2.y - x.y * d2.x)/cross;
+                Point2f center =  p1 + d1 * t1;
+                double xx = (center.x - (width/2))/width * screen_width ;
+                double yy = -1*(center.y - (height/2))/height * screen_height ;
+                addobj2json(&gameobjects,"x",xx,yy,0.0,80.0); //add cross to gameobjects
+                break; // only keep the first cross
+            }
+
+        }
+    }
+    /* detect cross end*/
+    
+    
+        sort(lines_horizon.begin(), lines_horizon.end(), cmp1);//水平方向按照y升排
+        sort(lines_vertical.begin(), lines_vertical.end(), cmp2);//垂直方向按照x升排
+     
+        std::vector<cv::Vec4f> filter_horizon, filter_vertical, filter_lines;
+        int streak_gap = 1 * GAP;
+     
+    //Filter horizontal lines
+        if (lines_horizon.size() > 0) {
+            filter_horizon.push_back(lines_horizon[0]);
+            for (int i = 1; i < lines_horizon.size(); ++i) {
+                int gap = lines_horizon[i][1] - lines_horizon[i - 1][1];
+                if (gap > streak_gap) {
+                    filter_horizon.push_back(lines_horizon[i]);//keep the first line If they are very close on the x-axis.
+                }
+            }
+        }
+        //Filter verticle lines
+        if (lines_vertical.size() > 0) {
+            filter_vertical.push_back(lines_vertical[0]);
+            for (int i = 1; i < lines_vertical.size(); ++i) {
+                int gap = lines_vertical[i][0] - lines_vertical[i - 1][0];
+                if (gap > streak_gap) {
+                    filter_vertical.push_back(lines_vertical[i]); //keep the first line If they are very close on the y-axis.
+                }
+            }
+        }
+
+//    int res = filter_horizon.size() + filter_vertical.size();
+//    cout<<"There are "<<res<<" lines"<<endl;
+    filter_lines.reserve( filter_horizon.size() + filter_vertical.size() ); // preallocate memory
+    filter_lines.insert( filter_lines.end(), filter_horizon.begin(), filter_horizon.end() );
+    filter_lines.insert( filter_lines.end(), filter_vertical.begin(), filter_vertical.end() );
+    /* Filter lines end*/
+    
+    
+    for (size_t i = 0; i < filter_lines.size(); i++)
     {
-        Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
-        Point point2 = Point(cvRound(lines[i][2]), cvRound(lines[i][3]));
+        Point point1 = Point(cvRound(filter_lines[i][0]), cvRound(filter_lines[i][1]));
+        Point point2 = Point(cvRound(filter_lines[i][2]), cvRound(filter_lines[i][3]));
         Point center = Point((point1.x+point2.x)/2,(point1.y+point2.y)/2);
         double x = (center.x - (width/2))/width * screen_width ;
         double y = -1*(center.y - (height/2))/height * screen_height ;
         double length = cv::norm(point1 - point2)/(width*height/(screen_width*screen_height));
-        double  k = (double)(lines[i][3] - lines[i][1]) / (double)(lines[i][2] - lines[i][0]);
-        double angle = atan(k) * 180.0/3.1415926;
-        addobj2json(&gameobjects,"w",x,y,angle,length);
+        double  k = (double)(filter_lines[i][3] -filter_lines[i][1]) / (double)(filter_lines[i][2] -filter_lines[i][0]);
+        double angle = atan(k) * 180.0/CV_PI;
+        addobj2json(&gameobjects,"w",x,y,angle,length); //add lines to game
     }
     
-    //objs2json(lines,&gameobjects);
-    //std::cout << gameobjects<< std::endl;
     return gameobjects.dump();
 
 }
 
+/* !!! LineDetector::detect_line and LineDetector::img2json are actully doing the same thing, But they are inconsistent now, this function needs to be updated !!! */
+
 Mat LineDetector::detect_line(Mat image) {
 
-    /*
-    Mat colorFilteredImage = filter_only_yellow_white(image);
-    Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
-    Mat edgesOnly = detect_edges(regionOfInterest);
 
-    vector<Vec4i> lines;
-    HoughLinesP(edgesOnly, lines, 1, CV_PI/180, 10, 20, 100);
-
-    return draw_lines(image, lines);
-     */
     cv::Size size = image.size();
     double height = size.height;
     double width = size.width;
@@ -167,15 +211,13 @@ Mat LineDetector::detect_line(Mat image) {
     if (height > 720 || width > 720)
     {
         double ratio = 720/max(width,height);
-        cout<< "[game]Scale ratio is " << ratio <<endl;
+        cout<< "[Preview]Scale ratio is " << ratio <<endl;
         resize(image, image,cv::Size(),ratio,ratio); //scale to 720*720
         size = image.size();
         height = size.height;
         width = size.width;
     }
     
-    
-
     Mat grayImage,blurImage,cannyImage,output;
     output=image.clone();
     cvtColor(image, grayImage, COLOR_RGB2GRAY);
@@ -211,154 +253,3 @@ Mat LineDetector::detect_line(Mat image) {
 
 }
 
-//Mat LineDetector::detect_line(Mat image) {
-//    /*
-//    Mat colorFilteredImage = filter_only_yellow_white(image);
-//    Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
-//    Mat edgesOnly = detect_edges(regionOfInterest);
-//
-//    vector<Vec4i> lines;
-//    HoughLinesP(edgesOnly, lines, 1, CV_PI/180, 10, 20, 100);
-//
-//    return draw_lines(image, lines);
-//     */
-//
-//    Mat dst, cdst;
-//    Canny(image, dst, 50, 200, 3);
-//    cvtColor(dst, cdst, COLOR_GRAY2BGR);
-//
-//    vector<Vec4i> lines;
-//    HoughLinesP(dst, lines, 1, CV_PI/180, 10, 20, 100);
-//
-//    for (size_t i = 0; i < lines.size(); i++)
-//        {
-//            Vec4i l = lines[i];
-//            line(cdst, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, 4);
-//        }
-//    return cdst;
-//
-//}
-//
-//Mat LaneDetector::filter_only_yellow_white(Mat image) {
-//    
-//    Mat hlsColorspacedImage;
-//    cvtColor(image, hlsColorspacedImage, COLOR_RGB2HLS);
-//    
-//    Mat yellowMask;
-//    Scalar yellowLower = Scalar(10, 0, 90);
-//    Scalar yellowUpper = Scalar(50, 255, 255);
-//    inRange(hlsColorspacedImage, yellowLower, yellowUpper, yellowMask);
-//    
-//    Mat whiteMask;
-//    Scalar whiteLower = Scalar(0, 190, 0);
-//    Scalar whiteUpper = Scalar(255, 255, 255);
-//    inRange(hlsColorspacedImage, whiteLower, whiteUpper, whiteMask);
-//    
-//    Mat mask;
-//    bitwise_or(yellowMask, whiteMask, mask);
-//    
-//    Mat maskedImage;
-//    bitwise_and(image, image, maskedImage, mask);
-//    
-//    return maskedImage;
-//}
-//
-//Mat LaneDetector::crop_region_of_interest(Mat image) {
-//    
-//    /*
-//     The code below draws the region of interest into a new image of the same dimensions as the original image.
-//     The region of interest is filled with the color we want to filter for in the image.
-//     Lastly it combines the two images.
-//     The result is only the color within the region of interest.
-//     */
-//    
-//    int maxX = image.rows;
-//    int maxY = image.cols;
-//    
-//    Point shape[1][5];
-//    shape[0][0] = Point(0, maxX);
-//    shape[0][1] = Point(maxY, maxX);
-//    shape[0][2] = Point((int)(0.55 * maxY), (int)(0.6 * maxX));
-//    shape[0][3] = Point((int)(0.45 * maxY), (int)(0.6 * maxX));
-//    shape[0][4] = Point(0, maxX);
-//    
-//    Scalar color_to_filter(255, 255, 255);
-//    
-//    Mat filledPolygon = Mat::zeros(image.rows, image.cols, CV_8UC3); // empty image with same dimensions as original
-//    const Point* polygonPoints[1] = { shape[0] };
-//    int numberOfPoints[] = { 5 };
-//    int numberOfPolygons = 1;
-//    fillPoly(filledPolygon, polygonPoints, numberOfPoints, numberOfPolygons, color_to_filter);
-//    
-//    // Cobine images into one
-//    Mat maskedImage;
-//    bitwise_and(image, filledPolygon, maskedImage);
-//    
-//    return maskedImage;
-//}
-//
-//Mat LaneDetector::draw_lines(Mat image, vector<Vec4i> lines) {
-//    
-//    vector<double> rightSlope, leftSlope, rightIntercept, leftIntercept;
-//    
-//    for (int i=0; i<lines.size(); i++) {
-//        Vec4i line = lines[i];
-//        double x1 = line[0];
-//        double y1 = line[1];
-//        double x2 = line[2];
-//        double y2 = line[3];
-//        
-//        double yDiff = y1-y2;
-//        double xDiff = x1-x2;
-//        double slope = yDiff/xDiff;
-//        double yIntecept = y2 - (slope*x2);
-//        
-//        if ((slope > 0.3) && (x1 > 500)) {
-//            rightSlope.push_back(slope);
-//            rightIntercept.push_back(yIntecept);
-//        } else if ((slope < -0.3) && (x1 < 600)) {
-//            leftSlope.push_back(slope);
-//            leftIntercept.push_back(yIntecept);
-//        }
-//    }
-//    
-//    double leftAvgSlope = getAverage(leftSlope, 30);
-//    double leftAvgIntercept = getAverage(leftIntercept, 30);
-//    double rightAvgSlope = getAverage(rightSlope, 30);
-//    double rightAvgIntercept = getAverage(rightIntercept, 30);
-//    
-//    int leftLineX1 = int(((0.65*image.rows) - leftAvgIntercept)/leftAvgSlope);
-//    int leftLineX2 = int((image.rows - leftAvgIntercept)/leftAvgSlope);
-//    int rightLineX1 = int(((0.65*image.rows) - rightAvgIntercept)/rightAvgSlope);
-//    int rightLineX2 = int((image.rows - rightAvgIntercept)/rightAvgSlope);
-//    
-//    Point shape[1][4];
-//    shape[0][0] = Point(leftLineX1, int(0.65*image.rows));
-//    shape[0][1] = Point(leftLineX2, int(image.rows));
-//    shape[0][2] = Point(rightLineX2, int(image.rows));
-//    shape[0][3] = Point(rightLineX1, int(0.65*image.rows));
-//    
-//    const Point* polygonPoints[1] = { shape[0] };
-//    int numberOfPoints[] = { 4 };
-//    int numberOfPolygons = 1;
-//    Scalar fillColor(0, 0, 255);
-//    fillPoly(image, polygonPoints, numberOfPoints, numberOfPolygons, fillColor);
-//    
-//    Scalar rightColor(0,255,0);
-//    Scalar leftColor(255,0,0);
-//    line(image, shape[0][0], shape[0][1], leftColor, 10);
-//    line(image, shape[0][3], shape[0][2], rightColor, 10);
-//    
-//    return image;
-//}
-//
-//Mat LaneDetector::detect_edges(Mat image) {
-//    
-//    Mat greyScaledImage;
-//    cvtColor(image, greyScaledImage, COLOR_RGB2GRAY);
-//    
-//    Mat edgedOnlyImage;
-//    Canny(greyScaledImage, edgedOnlyImage, 50, 120);
-//    
-//    return edgedOnlyImage;
-//}
