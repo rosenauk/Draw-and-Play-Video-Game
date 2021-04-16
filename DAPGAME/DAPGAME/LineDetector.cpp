@@ -15,6 +15,9 @@ using namespace std;
 
 using json = nlohmann::json;
 
+const int screen_height = 1334 * 0.8;
+const int screen_width = 750 * 0.8;
+
 //double getAverage(vector<double> vector, int nElements) {
 //    
 //    double sum = 0;
@@ -115,9 +118,9 @@ String LineDetector::img2json(Mat image) {
     for (int i = 0; i < circles.size(); i++)
     {
         Point center((uint16_t)cvRound(circles[i][0]), (uint16_t)cvRound(circles[i][1]));
-        double x = (center.x - (width/2))/width * 750 ;
-        double y = -1*(center.y - (height/2))/height * 1334 ;
-        int radius = (uint16_t)cvRound(circles[i][2])/(width*height/(750*1334));
+        double x = (center.x - (width/2))/width * screen_width ;
+        double y = -1*(center.y - (height/2))/height * screen_height;
+        int radius = (uint16_t)cvRound(circles[i][2])/(width*height/(screen_width*screen_height));
 //        // circle center
         addobj2json(&gameobjects,"o",x,y,90.0,radius);
     }
@@ -125,15 +128,15 @@ String LineDetector::img2json(Mat image) {
     
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 50, 10);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 75, 30);
     for (size_t i = 0; i < lines.size(); i++)
     {
         Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
         Point point2 = Point(cvRound(lines[i][2]), cvRound(lines[i][3]));
         Point center = Point((point1.x+point2.x)/2,(point1.y+point2.y)/2);
-        double x = (center.x - (width/2))/width * 750 ;
-        double y = -1*(center.y - (height/2))/height * 1334 ;
-        double length = cv::norm(point1 - point2)/(width*height/(750*1334));
+        double x = (center.x - (width/2))/width * screen_width ;
+        double y = -1*(center.y - (height/2))/height * screen_height ;
+        double length = cv::norm(point1 - point2)/(width*height/(screen_width*screen_height));
         double  k = (double)(lines[i][3] - lines[i][1]) / (double)(lines[i][2] - lines[i][0]);
         double angle = atan(k) * 180.0/3.1415926;
         addobj2json(&gameobjects,"w",x,y,angle,length);
@@ -195,7 +198,7 @@ Mat LineDetector::detect_line(Mat image) {
 
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 50, 100);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 75, 30);
     for (size_t i = 0; i < lines.size(); i++)
     {
         Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));
