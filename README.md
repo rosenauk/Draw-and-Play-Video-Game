@@ -14,6 +14,6 @@ Senior Software ENGR Project CS46x. An IOS app that will transform a picture int
 
 
 # BUGs
-~~* App will crash when upload high resolution photos~~
-~~* App will crash after uploading photos multiple times~~
+~~* App will crash when upload high resolution photos
+* App will crash after uploading photos multiple times~~
 * [Swift default AlertViewController breaking constraints](https://stackoverflow.com/questions/55653187/swift-default-alertviewcontroller-breaking-constraints)
