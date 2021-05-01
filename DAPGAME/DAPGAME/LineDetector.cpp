@@ -13,8 +13,8 @@ using namespace std;
 using json = nlohmann::json;
 
 #define GAP 5 //Set the pixel pitch
-const int screen_height = 1334 * 0.8;
-const int screen_width = 750 * 0.8;
+const int screen_height = 1334 * 0.9; // standard height 1334
+const int screen_width = 750 * 0.75; // standard width 750
 
 
 bool cmp1(const Vec4f &a, const Vec4f &b) {
@@ -67,6 +67,8 @@ String LineDetector::img2json(Mat image) {
         height = size.height;
         width = size.width;
     }
+    cout << "new Height: "<< height <<endl;
+    cout << "new Width: "<< width <<endl;
     json gameobjects;
     /*
     Mat colorFilteredImage = filter_only_yellow_white(image);
@@ -93,6 +95,7 @@ String LineDetector::img2json(Mat image) {
         double y = -1*(center.y - (height/2))/height * screen_height;
         int radius = (uint16_t)cvRound(circles[i][2])/(width*height/(screen_width*screen_height));
 //        // circle center
+        // has something wrong
         addobj2json(&gameobjects,"o",x,y,90.0,radius);
     }
 
@@ -147,8 +150,8 @@ String LineDetector::img2json(Mat image) {
     /* detect cross end*/
     
     
-        sort(lines_horizon.begin(), lines_horizon.end(), cmp1);//水平方向按照y升排
-        sort(lines_vertical.begin(), lines_vertical.end(), cmp2);//垂直方向按照x升排
+        sort(lines_horizon.begin(), lines_horizon.end(), cmp1);//The horizontal direction is ascended by y
+        sort(lines_vertical.begin(), lines_vertical.end(), cmp2);//The vertical direction is ascending by x
      
         std::vector<cv::Vec4f> filter_horizon, filter_vertical, filter_lines;
         int streak_gap = 1 * GAP;
@@ -189,7 +192,10 @@ String LineDetector::img2json(Mat image) {
         Point center = Point((point1.x+point2.x)/2,(point1.y+point2.y)/2);
         double x = (center.x - (width/2))/width * screen_width ;
         double y = -1*(center.y - (height/2))/height * screen_height ;
-        double length = cv::norm(point1 - point2)/(width*height/(screen_width*screen_height));
+        Point game_point1 = Point((point1.x - (width/2))/width * screen_width,-1*(point1.y - (height/2))/height * screen_height);
+        Point game_point2 = Point((point2.x - (width/2))/width * screen_width,-1*(point2.y - (height/2))/height * screen_height);
+//        double length = cv::norm(point1 - point2)/(width*height/(screen_width*screen_height));
+        double length = cv::norm(game_point1 - game_point2);
         double  k = (double)(filter_lines[i][3] -filter_lines[i][1]) / (double)(filter_lines[i][2] -filter_lines[i][0]);
         double angle = atan(k) * 180.0/CV_PI;
         addobj2json(&gameobjects,"w",x,y,angle,length); //add lines to game
