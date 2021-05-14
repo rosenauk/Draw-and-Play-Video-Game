@@ -10,6 +10,11 @@ import SpriteKit
 import GameplayKit
 
 class GameViewController: UIViewController {
+    
+    @IBAction func backOnTap(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    @IBOutlet weak var StartButton: UIButton!
     var gameData: [MapObject] = []
 
     override func viewDidLoad() {

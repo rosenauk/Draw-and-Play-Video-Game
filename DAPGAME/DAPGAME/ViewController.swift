@@ -7,8 +7,22 @@
 
 import UIKit
 
+let demoData:[MapObject] = [
+    ("o",CGPoint(x:1.0,y:1.0),90.0,48.0),
+    ("b",CGPoint(x:-60.0,y:-120.0),90.0,48.0),
+    ("b",CGPoint(x:60.0,y:-240.0),90.0,48.0),
+    ("x",CGPoint(x:10.0,y:200.0),90.0,48.0),
+    ("w",CGPoint(x:20.0,y:390.0),0.0,314.0),
+    ("w",CGPoint(x:-130.0,y:233.0),-90.0,314.0),
+    ("w",CGPoint(x:7.0,y:76.0),0.0,233.0),
+    ("w",CGPoint(x:125.0,y:200.0),90.0,233.0),
+    ("w",CGPoint(x:25.0,y:301.0),-180.0,176.0),
+    ("w",CGPoint(x:-56.0,y:230.0),-270.0,100.0)
+]
+
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     var gameData:[MapObject]?
+    @IBOutlet weak var startButton: UIButton!
     
     @IBAction func takePhoto(_ sender: Any) {
         let actionSheetController = UIAlertController(title: "Choose your image", message: nil, preferredStyle: .actionSheet)
@@ -17,7 +31,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             //do nothing
         }
         
-        let takingPicturesAction = UIAlertAction(title: "Take Photo", style: UIAlertAction.Style.destructive) { (alertAction) -> Void in
+        let takingPicturesAction = UIAlertAction(title: "Take Photo(unrecommended)", style: UIAlertAction.Style.default) { (alertAction) -> Void in
             self.getImageGo(type: 1)
         }
         
@@ -33,6 +47,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         actionSheetController.popoverPresentationController?.sourceView = sender as? UIView
         //show
         self.present(actionSheetController, animated: true, completion: nil)
+        
     }
     
     @IBOutlet weak var imageView: UIImageView!
@@ -40,7 +55,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     override func viewDidLoad() {	
         super.viewDidLoad()
+        
         // Do any additional setup after loading the view.
+        
+        
+        startButton.isEnabled = false
         
 //        let button = UIButton.init(type: .custom)
 //
@@ -83,6 +102,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             //Screenshot; Unprocessed
             imageView.image = info[UIImagePickerController.InfoKey.editedImage] as? UIImage
         }
+        startButton.isEnabled = true
  
     }
     
@@ -114,36 +134,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return nil
     }
     
-//    func convertStringToDictionary(text: String) -> [String:AnyObject]? {
-//        if let data = text.data(using: .utf8) {
-//            do {
-//                let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-//                return json
-//            } catch {
-//                print("Something went wrong")
-//            }
-//        }
-//        return nil
-//    }
-    
+    @IBAction func showDemo(_ sender: Any) {
+        gameData = demoData
+    }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
         if let vc = segue.destination as? GameViewController {
-            //vc.modalPresentationStyle = .fullScreen
             
-            //Modify this
-            let demoData:[MapObject] = [
-                ("o",CGPoint(x:1.0,y:1.0),90.0,48.0),
-                ("b",CGPoint(x:-60.0,y:-120.0),90.0,48.0),
-                ("b",CGPoint(x:60.0,y:-240.0),90.0,48.0),
-                ("x",CGPoint(x:10.0,y:200.0),90.0,48.0),
-                ("w",CGPoint(x:20.0,y:390.0),0.0,314.0),
-                ("w",CGPoint(x:-130.0,y:233.0),-90.0,314.0),
-                ("w",CGPoint(x:7.0,y:76.0),0.0,233.0),
-                ("w",CGPoint(x:125.0,y:200.0),90.0,233.0),
-                ("w",CGPoint(x:25.0,y:301.0),-180.0,176.0),
-                ("w",CGPoint(x:-56.0,y:230.0),-270.0,100.0)
-            ]
             vc.gameData = gameData ?? demoData
         }
     }

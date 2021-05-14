@@ -70,16 +70,6 @@ String LineDetector::img2json(Mat image) {
     cout << "new Height: "<< height <<endl;
     cout << "new Width: "<< width <<endl;
     json gameobjects;
-    /*
-    Mat colorFilteredImage = filter_only_yellow_white(image);
-    Mat regionOfInterest = crop_region_of_interest(colorFilteredImage);
-    Mat edgesOnly = detect_edges(regionOfInterest);
-    
-    vector<Vec4i> lines;
-    HoughLinesP(edgesOnly, lines, 1, CV_PI/180, 10, 20, 100);
-    
-    return draw_lines(image, lines);
-     */
     
     Mat grayImage,blurImage,cannyImage,output;
     output=image.clone();
@@ -102,7 +92,7 @@ String LineDetector::img2json(Mat image) {
     
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 75, 30);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 90, 75, 30);
     
     
 /* Filter lines begin*/
@@ -124,29 +114,45 @@ String LineDetector::img2json(Mat image) {
     
 /* detect cross*/
     
+    bool flag = false;
     if(lines_slanted.size()>=2){
-
-        Point2f p1 = Point2f(cvRound(lines_slanted[0][0]), cvRound(lines_slanted[0][1]));
-        Point2f p2 = Point2f(cvRound(lines_slanted[0][2]), cvRound(lines_slanted[0][3]));
-        for (size_t i = 1; i < lines_slanted.size(); i++)
+        for (size_t i = 0; i < lines_slanted.size() - 1 ; i++)
+            
         {
-            Point2f p3 = Point2f(cvRound(lines_slanted[i][0]), cvRound(lines_slanted[i][1]));
-            Point2f p4 = Point2f(cvRound(lines_slanted[i][2]), cvRound(lines_slanted[i][3]));
-            Point2f x = p3 - p1;
-            Point2f d1 = p2 - p1;
-            Point2f d2 = p4 - p3;
-            float cross = d1.x*d2.y - d1.y*d2.x;
-            if (abs(cross) >= /*EPS*/1e-8) {
-                double t1 = (x.x * d2.y - x.y * d2.x)/cross;
-                Point2f center =  p1 + d1 * t1;
-                double xx = (center.x - (width/2))/width * screen_width ;
-                double yy = -1*(center.y - (height/2))/height * screen_height ;
-                addobj2json(&gameobjects,"x",xx,yy,0.0,80.0); //add cross to gameobjects
+            Point2f p1 = Point2f(cvRound(lines_slanted[i][0]), cvRound(lines_slanted[i][1]));
+            Point2f p2 = Point2f(cvRound(lines_slanted[i][2]), cvRound(lines_slanted[i][3]));
+            for (size_t j = i+1; j < lines_slanted.size(); j++)
+            {
+                Point2f p3 = Point2f(cvRound(lines_slanted[j][0]), cvRound(lines_slanted[j][1]));
+                Point2f p4 = Point2f(cvRound(lines_slanted[j][2]), cvRound(lines_slanted[j][3]));
+                Point2f x = p3 - p1;
+                Point2f d1 = p2 - p1;
+                Point2f d2 = p4 - p3;
+                float cross = d1.x*d2.y - d1.y*d2.x;
+                if (abs(cross) > /*EPS*/1e-8) {
+                    double t1 = (x.x * d2.y - x.y * d2.x)/cross;
+                    Point2f center =  p1 + d1 * t1;
+                    double xx = (center.x - (width/2))/width * screen_width ;
+                    double yy = -1*(center.y - (height/2))/height * screen_height ;
+                    if(abs(center.x)<375. && abs(center.y)<667.0){
+                        addobj2json(&gameobjects,"x",xx,yy,0.0,80.0); //add cross to gameobjects
+                        flag = true;
+                    }
+                }
+                if(flag){
+                    break; // only keep the first cross
+                }
+
+            }
+            if(flag){
                 break; // only keep the first cross
             }
-
         }
+
+       
     }
+
+    
     /* detect cross end*/
     
     
@@ -246,7 +252,7 @@ Mat LineDetector::detect_line(Mat image) {
 
     Canny(grayImage, cannyImage, 50, 200, 3);
     vector<Vec4f> lines;
-    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 100, 75, 30);
+    HoughLinesP(cannyImage, lines, 1, CV_PI/180, 90, 75, 30);
     for (size_t i = 0; i < lines.size(); i++)
     {
         Point point1 = Point(cvRound(lines[i][0]), cvRound(lines[i][1]));

@@ -13,7 +13,7 @@ typealias MapObject = (String,CGPoint,CGFloat,CGFloat)// type, postion, angle, s
 
 class GameScene: SKScene,SKPhysicsContactDelegate {
     
-    let debug = true
+    let debug = false
     
     
     var mapData:[MapObject] = []
